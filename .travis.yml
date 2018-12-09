@@ -1,8 +1,9 @@
 language: generic
 dist: trusty
-sudo: false
+sudo: true
 before_install:
   - git submodule update --init --recursive
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 install:
   # source because it sets up env vars on some platforms
   - source ci/travis/travis_install.sh
@@ -16,6 +17,7 @@ env:
     - YCM_CORES=3
     - COVERAGE=true
     - USE_CLANG_COMPLETER=true
+   - secure: "EdngcNPAJqUMc+NOL5/IhJqLQJclWlm8bB67NnqS+ARGyZzLBx/4sAp81trx/seZdtd3sb7Kc9awOtZHhwY5u1ZCHonuwe5MiIfJudi4V5C4/hX/T5L7c3Nv0pkq23+W/1f8x3D1iRswbbfYCsd0KF2bANKpzS0WaMTLVmE1oNKlTS5tmI9pgV0Eea3Qk2iog0WEKgfgftwTziyNDA2lC2TUv9qOBgjWglTWJ0gce4qmD2HXqPsgJOn07qVBj5YYt/42bLV1n8I6odYhuSFunqL8yiDigvOooBx5IhWLFJbJNXoBU8JnXeKyWtc1adv/YARLd0em8mSOzXOt5LQ229aNu7yeCLVkNm5rTzNdnHFm8YFkIv4vUzBCU8hVjBu5b2S9LNy04yF6G9/SlKga+CKrz3dSRSTHiIP3KG30jSTEVhDLVcGAAPfAkQnKvhX0n1jEMu8opjphsQVoWeV+k55nuWQCr3CMxwmZ3YLxUfqQqQ9gplNuxilpsS4icVXMtJtU6naZcA5D14J+gi4D1q1n2ouGbpd/rlDb9sMUMDqO7sNegOSbeVsehfO9pFKoZOu7EzXtj9xYHahoThS41lKFqGoE3qN8fiGFKEPfdYCI9VwHkTcpEupSAdEpe0SjYbTWaSNmU5NZbyPNgSDuuMfEMkzqFOOGj289CGp/6qU="
   matrix:
     - YCMD_PYTHON_VERSION=2.7 USE_CLANG_COMPLETER=false
     - YCMD_PYTHON_VERSION=2.7
@@ -56,6 +58,14 @@ addons:
      - llvm
      - libncurses5-dev
      - libncursesw5-dev
+  coverity_scan:
+    project:
+      name: "bstaletic/ycmd-copy"
+      description: "<Your project description here>"
+    notification_email: boris.staletic@gmail.com
+    build_command_prepend: "cmake -DUSE_CLANG_COMPLETER=ON cpp"
+    build_command: "make -j3"
+    branch_pattern: coverity_scan
 cache:
   directories:
     - $HOME/.cache/pip  # Python packages from pip
@@ -66,3 +76,4 @@ cache:
     - $TRAVIS_BUILD_DIR/third_party/racerd/target  # Racerd compilation
       # jdt.ls download
     - $TRAVIS_BUILD_DIR/third_party/eclipse.jdt.ls/target/cache
+
